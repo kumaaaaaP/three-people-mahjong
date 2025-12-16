@@ -1,0 +1,161 @@
+/* style.css */
+
+/* CSS リセット (簡略版) */
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box; /* レイアウト計算を楽にする */
+}
+
+/* ボディ全体のスタイル */
+body {
+    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    background-color: #2c5846; /* 麻雀卓らしい暗めの緑色 */
+    color: #fff;
+    min-height: 100vh;
+    display: flex;
+    justify-content: center;
+    align-items: center; /* 卓を画面中央に配置 */
+}
+
+/* メインコンテナ */
+#mahjong-game {
+    width: 90%;
+    max-width: 1200px;
+    padding: 20px;
+}
+
+/* 非表示設定 */
+.hidden {
+    display: none !important;
+}
+
+/* 卓エリアのレイアウト */
+#table-area {
+    background-color: #3b705e; /* 卓布の色 */
+    border: 5px solid #4a907b;
+    border-radius: 15px;
+    padding: 20px;
+    position: relative;
+    /* プレイヤーの配置を調整するためのFlexboxまたはGrid */
+    display: grid;
+    grid-template-areas: 
+        ". opponent-top ."
+        "opponent-right field-info opponent-left" /* 実際は3人なので左右は不要、手前と上と右（または左） */
+        ". self-area .";
+    grid-template-columns: 1fr 2fr 1fr;
+    grid-template-rows: 1fr auto 1fr;
+    height: 700px; /* ある程度高さを固定 */
+}
+
+/* プレイヤーエリアの配置 */
+#player-opponent-top { grid-area: opponent-top; text-align: center; }
+#player-opponent-right { 
+    grid-area: opponent-right; 
+    text-align: left;
+    transform: rotate(90deg); /* 牌を横から見るように回転させる */
+    transform-origin: bottom left; 
+    margin-top: 150px;
+}
+#player-self { 
+    grid-area: self-area; 
+    text-align: center; 
+    align-self: end;
+}
+#field-info { grid-area: field-info; text-align: center; }
+
+/* 牌の基本スタイル */
+.tile {
+    font-size: 30px; /* 絵文字サイズ */
+    line-height: 1.2;
+    padding: 2px 4px;
+    margin: 0 1px;
+    background-color: #fff; /* 牌の色 */
+    border: 1px solid #333;
+    border-radius: 4px;
+    cursor: pointer; /* マウスホバーで操作可能であることを示す */
+    user-select: none; /* 選択させない */
+    display: inline-block;
+}
+
+/* 手牌のスタイル */
+#hand-self .tile {
+    box-shadow: 2px 2px 3px rgba(0, 0, 0, 0.4);
+    transition: transform 0.1s ease;
+}
+
+/* 牌を選択した時のスタイル（JavaScriptでクラスを付与） */
+#hand-self .tile.selected {
+    transform: translateY(-15px); /* 選択された牌を少し浮き上がらせる */
+    border-color: #f39c12;
+}
+
+/* 赤ドラ牌のスタイル（JavaScriptでクラスを付与） */
+.tile.red-dora {
+    color: #e74c3c; /* 赤色を強調 */
+    font-weight: bold;
+}
+
+/* プレイヤーの手牌コンテナ */
+.hand {
+    display: flex;
+    justify-content: center;
+    padding: 10px 0;
+    margin-bottom: 5px;
+}
+
+/* 河（捨て牌）コンテナ */
+.river {
+    display: flex;
+    flex-wrap: wrap; /* 捨て牌を複数行に並べる */
+    justify-content: center;
+    min-height: 50px; /* 捨て牌がないときも場所を確保 */
+    border: 1px dashed rgba(255, 255, 255, 0.3);
+    padding: 5px;
+    margin-top: 10px;
+}
+
+/* 他家の手牌（見えない状態） */
+.player-area:not(#player-self) .hand {
+    /* 他家の手牌は裏返しに見えるようにする、または数を表示するだけ */
+    /* この骨格では手牌コンテナを省略していますが、追加する場合はこのスタイルを適用 */
+}
+
+#controls-area {
+    text-align: center;
+    padding: 15px;
+    background-color: rgba(0, 0, 0, 0.5);
+    border-radius: 8px;
+    margin-top: 20px;
+}
+
+#action-buttons button {
+    padding: 8px 15px;
+    margin: 5px;
+    font-size: 16px;
+    cursor: pointer;
+    background-color: #3498db;
+    color: white;
+    border: none;
+    border-radius: 5px;
+    transition: background-color 0.2s;
+}
+
+#action-buttons button:hover:not(:disabled) {
+    background-color: #2980b9;
+}
+
+#action-buttons button:disabled {
+    background-color: #95a5a6;
+    cursor: not-allowed;
+}
+
+#log-area {
+    background-color: rgba(0, 0, 0, 0.3);
+    padding: 10px;
+    margin-top: 15px;
+    height: 150px;
+    overflow-y: scroll; /* ログが多くなったらスクロール可能に */
+    border-radius: 5px;
+}
+
