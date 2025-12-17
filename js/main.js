@@ -4,7 +4,6 @@
  */
 
 import { GameConfig } from './config.js';
-// ※まだファイルが存在しないため、実装時はこれらを作成する必要があります
 import { GameState } from './core/GameState.js'; 
 import { Renderer } from './view/Renderer.js';
 
