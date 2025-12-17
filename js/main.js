@@ -6,7 +6,7 @@
 import { GameConfig } from './config.js';
 import { GameState } from './core/GameState.js'; 
 import { Renderer } from './view/Renderer.js';
-import { Player } from './core/Player.js'; // Playerクラスもインポート
+import { Player } from './core/Player.js'; 
 
 class Main {
     constructor() {
