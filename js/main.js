@@ -103,7 +103,6 @@ class Main {
         this.config.length = document.getElementById('game-length').value;
 
         // 赤ドラ設定 (チェックボックスがあれば1枚、なければ0枚とする)
-        // ※5p, 5sは今回は固定設定だが、必要ならここでも取得可能
         this.config.redRules.p3 = document.getElementById('red-3p').checked ? 1 : 0;
         this.config.redRules.s3 = document.getElementById('red-3s').checked ? 1 : 0;
         this.config.redRules.p7 = document.getElementById('red-7p').checked ? 1 : 0;
