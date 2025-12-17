@@ -57,7 +57,7 @@ class Main {
             });
         });
 
-        // ⭐ 新規追加: Rendererから発火される打牌イベントを捕捉
+        // 新規追加: Rendererから発火される打牌イベントを捕捉
         document.addEventListener('discardTile', (e) => {
             this.handleUserDiscard(e.detail);
         });
@@ -96,7 +96,7 @@ class Main {
         // 3. ゲームコアの初期化
         this.renderer = new Renderer();
         
-        // ⭐ GameStateにRendererのインスタンスを渡し、Game Stateが変更を通知できるようにする
+        // GameStateにRendererのインスタンスを渡し、Game Stateが変更を通知できるようにする
         this.gameState = new GameState(this.config, this.renderer);
 
         // 4. ゲームスタート (配牌〜開局)
