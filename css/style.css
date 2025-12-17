@@ -1,0 +1,476 @@
+@charset "UTF-8";
+
+/* =========================================
+   基本設定 (Base)
+   ========================================= */
+:root {
+    --mat-color: #005633;        /* 深い緑色のマット */
+    --mat-texture: #004d2e;      /* マットの質感用 */
+    --tile-w: 3.4vmin;           /* 牌の幅 (画面サイズ連動) */
+    --tile-h: 4.6vmin;           /* 牌の高さ */
+    --tile-depth: 0.4vmin;       /* 牌の厚み */
+    --text-color: #ffffff;
+    --accent-color: #ffd700;     /* 金色（強調・ドラ） */
+    --ui-bg: rgba(0, 0, 0, 0.7); /* UI背景 */
+}
+
+* {
+    box-sizing: border-box;
+    margin: 0;
+    padding: 0;
+    user-select: none; /* ゲーム中のテキスト選択防止 */
+}
+
+body {
+    font-family: "Helvetica Neue", Arial, "Hiragino Kaku Gothic ProN", "Hiragino Sans", Meiryo, sans-serif;
+    background-color: #1a1a1a;
+    color: var(--text-color);
+    overflow: hidden; /* スクロール禁止 */
+    width: 100vw;
+    height: 100vh;
+}
+
+/* ユーティリティ */
+.hidden { display: none !important; }
+.btn-primary {
+    background: #2196F3;
+    color: white;
+    border: none;
+    padding: 10px 20px;
+    border-radius: 4px;
+    cursor: pointer;
+    font-size: 1.2rem;
+}
+.btn-primary:hover { background: #1976D2; }
+
+/* =========================================
+   1. ロビー画面 (Lobby)
+   ========================================= */
+#scene-lobby {
+    width: 100%;
+    height: 100%;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    background: radial-gradient(circle, #333 0%, #000 100%);
+}
+
+.lobby-container {
+    background: rgba(255, 255, 255, 0.1);
+    backdrop-filter: blur(10px);
+    padding: 40px;
+    border-radius: 12px;
+    width: 90%;
+    max-width: 500px;
+    text-align: center;
+    border: 1px solid rgba(255, 255, 255, 0.2);
+}
+
+.lobby-container h1 {
+    margin-bottom: 30px;
+    font-size: 2.5rem;
+    color: var(--accent-color);
+    text-shadow: 0 0 10px rgba(255, 215, 0, 0.5);
+}
+
+fieldset {
+    border: 1px solid #666;
+    border-radius: 8px;
+    margin-bottom: 20px;
+    padding: 15px;
+    text-align: left;
+}
+
+legend { padding: 0 10px; color: #ccc; }
+
+.setting-row {
+    display: flex;
+    justify-content: space-between;
+    margin-bottom: 10px;
+    align-items: center;
+}
+
+label {
+    margin-right: 15px;
+    cursor: pointer;
+}
+
+input[type="text"] {
+    width: 100%;
+    padding: 8px;
+    margin-top: 10px;
+    border-radius: 4px;
+    border: none;
+}
+
+/* =========================================
+   2. ゲーム画面 (Game Table)
+   ========================================= */
+#scene-game {
+    width: 100%;
+    height: 100%;
+    background-color: var(--mat-color);
+    /* マットの質感表現 */
+    background-image: radial-gradient(var(--mat-texture) 15%, transparent 16%),
+                      radial-gradient(var(--mat-texture) 15%, transparent 16%);
+    background-size: 10px 10px;
+    position: relative;
+}
+
+/* --- 中央情報 (Center Field) --- */
+#center-field {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    width: 30vmin;
+    height: 30vmin;
+    border: 2px solid rgba(0, 0, 0, 0.3);
+    background: rgba(0, 0, 0, 0.2);
+    border-radius: 10px;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    z-index: 10;
+}
+
+.info-panel {
+    text-align: center;
+    width: 100%;
+}
+
+#round-info { font-size: 2vmin; font-weight: bold; margin-bottom: 1vmin; }
+#tiles-left { font-size: 1.5vmin; margin-bottom: 1vmin; }
+
+#dora-indicators {
+    display: flex;
+    justify-content: center;
+    gap: 0.5vmin;
+    background: rgba(0,0,0,0.3);
+    padding: 0.5vmin;
+    border-radius: 4px;
+    width: fit-content;
+    margin: 0 auto;
+}
+
+/* --- 牌のデザイン (Tile Base) --- */
+/* 画像がない場合のCSS描画 */
+.tile-slot, .tile {
+    width: var(--tile-w);
+    height: var(--tile-h);
+    background: #f0f0f0; /* 牌の表面 */
+    border-radius: 0.3vmin;
+    box-shadow: 
+        1px 1px 0 #ccc, 
+        inset 0 0 2px rgba(0,0,0,0.2); /* 簡易的な立体感 */
+    position: relative;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    color: #333;
+    font-weight: bold;
+    font-size: 2vmin;
+}
+
+/* 背面（伏せ牌） */
+.tile.back, .tile-slot.back {
+    background: #e6b422; /* 黄色い背面 */
+    border: 1px solid #d4a017;
+}
+.tile.back::after {
+    content: ""; /* 竹の模様などを入れたい場合はここ */
+}
+
+/* 立体的な厚み（手牌用） */
+.hand-area .tile {
+    box-shadow: 
+        0 var(--tile-depth) 0 #bbb, /* 厚み */
+        0 calc(var(--tile-depth) + 2px) 5px rgba(0,0,0,0.4); /* 影 */
+    margin-bottom: var(--tile-depth); /* 厚み分持ち上げる */
+    transition: transform 0.1s;
+}
+
+/* 牌選択時のホバー */
+.hand-area.open .tile:hover {
+    transform: translateY(-1vmin);
+    cursor: pointer;
+}
+
+/* --- プレイヤーエリア共通設定 --- */
+.player-area {
+    position: absolute;
+    /* デバッグ用に枠線をつける場合は以下を有効化 */
+    /* border: 1px dashed rgba(255,255,255,0.2); */
+}
+
+/* 情報パネル（点数など） */
+.player-info {
+    background: var(--ui-bg);
+    padding: 5px 10px;
+    border-radius: 4px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    min-width: 10vmin;
+    box-shadow: 0 0 5px rgba(0,0,0,0.5);
+    font-size: 1.5vmin;
+}
+.player-info .name { font-size: 1.2vmin; opacity: 0.8; }
+.player-info .score { font-size: 2vmin; font-weight: bold; color: var(--accent-color); }
+.player-info .wind { 
+    font-size: 2.5vmin; 
+    font-weight: bold; 
+    border: 2px solid white;
+    width: 4vmin;
+    height: 4vmin;
+    line-height: 3.5vmin;
+    border-radius: 50%;
+    margin-bottom: 5px;
+    text-align: center;
+}
+
+/* 河 (Kawa) */
+.kawa-area {
+    display: flex;
+    flex-wrap: wrap;
+    width: calc(var(--tile-w) * 6 + 2vmin); /* 6枚切りの幅 */
+    height: calc(var(--tile-h) * 3 + 2vmin);
+    gap: 0.2vmin;
+}
+.kawa-area .tile {
+    /* 河の牌は少し小さくても良い */
+    transform: scale(0.9);
+}
+
+/* 手牌 (Hand) */
+.hand-area {
+    display: flex;
+    gap: 0.1vmin;
+}
+/* 理牌スペースなど */
+.hand-area .tile:last-child {
+    margin-left: 1vmin; /* ツモ牌を離す */
+}
+
+/* --- 視点別配置 (3人麻雀) --- */
+
+/* 1. 自分 (Self) - 下部 */
+#player-self {
+    bottom: 2vmin;
+    left: 50%;
+    transform: translateX(-50%);
+    width: 90%;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+}
+#player-self .kawa-area {
+    margin-bottom: 2vmin;
+}
+#player-self .hand-area {
+    margin-top: 1vmin;
+}
+#player-self .player-info {
+    position: absolute;
+    bottom: 0;
+    left: -15vmin; /* 左側に配置 */
+    flex-direction: row; /* 横並び */
+    gap: 10px;
+}
+#player-self .player-info .wind { margin: 0; }
+
+/* 2. 下家 (Shimocha) - 右側 */
+/* 2D視点のため、卓の右側に配置し、牌を左向き(-90deg)に回転させるのが一般的 */
+#player-shimocha {
+    right: 4vmin;
+    top: 50%;
+    transform: translateY(-50%);
+    display: flex;
+    flex-direction: row-reverse; /* 情報、手牌、河の順 */
+    align-items: center;
+}
+#player-shimocha .hand-area {
+    flex-direction: column; /* 縦積み */
+}
+#player-shimocha .hand-area .tile {
+    width: var(--tile-h); /* 横倒しにするのでWとHを逆に扱うイメージ */
+    height: var(--tile-w);
+    transform: rotate(-90deg); /* 左向き */
+    margin-bottom: -1.5vmin; /* 重なり調整 */
+    box-shadow: -2px 0 0 #bbb; /* 影の向き調整 */
+}
+#player-shimocha .kawa-area {
+    /* 河も90度回転させる必要があるが、コンテナごと回す */
+    transform: rotate(-90deg);
+    margin-left: 4vmin;
+}
+#player-shimocha .player-info {
+    margin-left: 2vmin;
+}
+
+/* 3. 上家 (Kamicha) - 左側 */
+#player-kamicha {
+    left: 4vmin;
+    top: 50%;
+    transform: translateY(-50%);
+    display: flex;
+    flex-direction: row;
+    align-items: center;
+}
+#player-kamicha .hand-area {
+    flex-direction: column-reverse; /* 上から下へ */
+}
+#player-kamicha .hand-area .tile {
+    width: var(--tile-h);
+    height: var(--tile-w);
+    transform: rotate(90deg); /* 右向き */
+    margin-top: -1.5vmin;
+    box-shadow: 2px 0 0 #bbb;
+}
+#player-kamicha .kawa-area {
+    transform: rotate(90deg);
+    margin-right: 4vmin;
+}
+#player-kamicha .player-info {
+    margin-right: 2vmin;
+}
+
+
+/* --- アクションボタン --- */
+#action-controls {
+    position: absolute;
+    bottom: 18vmin;
+    left: 50%;
+    transform: translateX(-50%);
+    display: flex;
+    gap: 10px;
+    z-index: 100;
+}
+
+.btn-action {
+    background: rgba(0,0,0,0.6);
+    color: white;
+    border: 2px solid white;
+    padding: 1vmin 3vmin;
+    font-size: 2vmin;
+    font-weight: bold;
+    border-radius: 30px;
+    cursor: pointer;
+    transition: all 0.2s;
+    box-shadow: 0 4px 10px rgba(0,0,0,0.5);
+}
+
+.btn-action:hover {
+    background: white;
+    color: #333;
+    transform: scale(1.1);
+}
+
+.btn-action.win {
+    background: #e74c3c; /* 赤 */
+    border-color: #c0392b;
+}
+
+.btn-action.secondary {
+    background: #95a5a6;
+    font-size: 1.5vmin;
+}
+
+/* --- カットイン演出 --- */
+#cutin-layer {
+    position: absolute;
+    top: 0; left: 0; width: 100%; height: 100%;
+    pointer-events: none;
+    z-index: 200;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+}
+/* JSでクラス付与してアニメーションさせる想定 */
+.cut-in-text {
+    font-size: 10vmin;
+    font-weight: 900;
+    color: red;
+    text-stroke: 2px white; /* Webkit text stroke support needed mostly */
+    -webkit-text-stroke: 3px white;
+    text-shadow: 5px 5px 0 black;
+    animation: popIn 0.5s ease-out forwards;
+}
+
+@keyframes popIn {
+    0% { transform: scale(0); opacity: 0; }
+    80% { transform: scale(1.2); opacity: 1; }
+    100% { transform: scale(1); opacity: 1; }
+}
+
+
+/* =========================================
+   3. モーダル (Result)
+   ========================================= */
+#modal-overlay {
+    position: fixed;
+    top: 0; left: 0; width: 100%; height: 100%;
+    background: rgba(0,0,0,0.8);
+    z-index: 999;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+}
+
+.modal-content {
+    background: white;
+    color: #333;
+    width: 80%;
+    max-width: 600px;
+    padding: 30px;
+    border-radius: 10px;
+    text-align: center;
+    box-shadow: 0 0 20px rgba(255,255,255,0.2);
+}
+
+#result-title {
+    font-size: 3rem;
+    color: #d32f2f;
+    margin-bottom: 20px;
+    font-weight: 900;
+}
+
+#yaku-list {
+    text-align: left;
+    margin: 20px auto;
+    width: 80%;
+    font-size: 1.2rem;
+    border-top: 2px solid #333;
+    border-bottom: 2px solid #333;
+    padding: 10px 0;
+}
+
+.yaku-row {
+    display: flex;
+    justify-content: space-between;
+    margin-bottom: 5px;
+}
+
+#final-ranking {
+    width: 100%;
+    border-collapse: collapse;
+    margin: 20px 0;
+}
+#final-ranking th, #final-ranking td {
+    border-bottom: 1px solid #ddd;
+    padding: 10px;
+}
+
+/* 鳴きエリアの微調整 (Naki) */
+.naki-area {
+    display: flex;
+    gap: 5px;
+    margin: 5px;
+}
+/* 鳴いた牌は少し寝かせるなどの処理が可能だが、一旦シンプルに表示 */
+.naki-group {
+    display: flex;
+    background: rgba(0,0,0,0.2);
+    padding: 2px;
+}
