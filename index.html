@@ -3,85 +3,153 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>三人麻雀</title>
-    <link rel="stylesheet" href="style.css"> </head>
+    <title>Open Sanma - 本格3人麻雀</title>
+    <link rel="stylesheet" href="css/style.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+</head>
 <body>
 
-    <header>
-        <h1>三人麻雀オンライン</h1>
-        <div id="connection-status">接続状況: 未接続</div>
-    </header>
-
-    <main id="mahjong-game">
-        <section id="setup-area">
-            <h2>ゲーム設定 / 接続</h2>
-            <input type="text" id="room-name" placeholder="部屋名を入力">
-            <button id="connect-button">接続 / 部屋作成</button>
-            <div id="game-options">
-                <label><input type="checkbox" id="option-red-dora" checked> 赤3赤7ドラ採用</label>
-                <label for="game-mode">ゲームモード:</label>
-                <select id="game-mode">
-                    <option value="tonpu">東風戦</option>
-                    <option value="hanchan">半荘戦</option>
-                </select>
-                <button id="start-game-button" disabled>ゲーム開始</button>
-            </div>
-        </section>
-
-        <section id="table-area" class="hidden">
+    <section id="scene-lobby" class="active">
+        <div class="lobby-container">
+            <h1>Open Sanma</h1>
             
-            <div id="field-info">
-                <p><strong>場風:</strong> <span id="current-wind">東</span> <strong class="separator">局:</strong> <span id="current-kyoku">1</span> <strong class="separator">本場:</strong> <span id="current-honba">0</span></p>
-                <p><strong>ドラ表示:</strong> <span id="dora-markers"></span></p>
-                <p><strong>残り山牌:</strong> <span id="remaining-yama"></span></p>
-            </div>
+            <form id="game-settings">
+                <fieldset>
+                    <legend>対局モード</legend>
+                    <label>
+                        <input type="radio" name="mode" value="cpu" checked> CPU対戦
+                    </label>
+                    <label>
+                        <input type="radio" name="mode" value="online"> オンライン対戦
+                    </label>
+                    <div id="online-input" class="hidden">
+                        <input type="text" id="room-id" placeholder="部屋名を入力">
+                    </div>
+                </fieldset>
 
-            <div id="players-container">
-                <div id="player-opponent-right" class="player-area">
-                    <div class="score">点数: <span id="score-right">25000</span></div>
-                    <div class="river" id="river-right"></div>
-                    <div class="name">プレイヤーC (上家)</div>
-                </div>
-                
-                <div id="player-opponent-top" class="player-area">
-                    <div class="score">点数: <span id="score-top">25000</span></div>
-                    <div class="river" id="river-top"></div>
-                    <div class="name">プレイヤーB (対面)</div>
-                </div>
-
-                <div id="player-self" class="player-area dealer-self">
-                    <h3>あなた (東家)</h3>
-                    <div class="score">点数: <span id="score-self">25000</span></div>
+                <fieldset>
+                    <legend>ルール設定</legend>
+                    <div class="setting-row">
+                        <span>戦形式:</span>
+                        <select id="game-length">
+                            <option value="east">東風戦</option>
+                            <option value="south" selected>半荘戦</option>
+                            <option value="west">一荘戦</option>
+                        </select>
+                    </div>
                     
-                    <div class="river" id="river-self"></div>
-                    
-                    <div class="hand" id="hand-self">
-                        </div>
+                    <div class="setting-row">
+                        <span>赤ドラ設定:</span>
+                        <label><input type="checkbox" id="red-3p"> 赤3筒 (各1枚)</label>
+                        <label><input type="checkbox" id="red-3s"> 赤3索 (各1枚)</label>
+                        <label><input type="checkbox" id="red-7p"> 赤7筒 (各1枚)</label>
+                        <label><input type="checkbox" id="red-7s"> 赤7索 (各1枚)</label>
+                    </div>
+                </fieldset>
+
+                <button type="button" id="btn-start" class="btn-primary">対局開始</button>
+            </form>
+        </div>
+    </section>
+
+    <section id="scene-game" class="hidden">
+        
+        <div id="center-field">
+            <div class="info-panel">
+                <div id="round-info">東1局</div>
+                <div id="tiles-left">残: <span id="deck-count">--</span></div>
+                <div id="dora-indicators">
+                    <div class="tile-slot"></div>
+                    <div class="tile-slot"></div>
+                    <div class="tile-slot"></div>
+                    <div class="tile-slot"></div>
+                    <div class="tile-slot"></div>
                 </div>
             </div>
-            
-            <div id="controls-area">
-                <p><strong>現在の行動:</strong> <span id="current-action">ツモ</span></p>
-                <div id="action-buttons">
-                    <button id="button-tsumo-agari" disabled>ツモ和了</button>
-                    <button id="button-riichi" disabled>リーチ</button>
-                    <button id="button-pon" disabled>ポン</button>
-                    <button id="button-chi" disabled>チー</button>
-                    <button id="button-kan" disabled>カン</button>
-                    <button id="button-ron" disabled>ロン和了</button>
-                    <button id="button-pass" disabled>パス</button>
+        </div>
+
+        <div id="player-kamicha" class="player-area left">
+            <div class="player-info">
+                <span class="name">CPU 1</span>
+                <span class="score">35,000</span>
+                <span class="wind">西</span>
+                <div class="riichi-stick hidden"></div>
+            </div>
+            <div class="hand-area closed">
                 </div>
+            <div class="naki-area">
+                </div>
+            <div class="kawa-area">
+                </div>
+        </div>
+
+        <div id="player-shimocha" class="player-area right">
+            <div class="player-info">
+                <span class="name">CPU 2</span>
+                <span class="score">35,000</span>
+                <span class="wind">南</span>
+                <div class="riichi-stick hidden"></div>
             </div>
+            <div class="hand-area closed"></div>
+            <div class="naki-area"></div>
+            <div class="kawa-area"></div>
+        </div>
+
+        <div id="player-self" class="player-area bottom">
+            <div class="kawa-area"></div>
             
-            <div id="log-area">
-                <h4>ログ</h4>
-                <ul id="game-log">
-                    <li>ゲーム開始待ち...</li>
-                </ul>
+            <div class="naki-area"></div>
+
+            <div class="hand-area open">
+                </div>
+
+            <div class="player-info">
+                <span class="name">YOU</span>
+                <span class="score">35,000</span>
+                <span class="wind">東</span>
+                <div class="riichi-stick hidden"></div>
             </div>
+        </div>
 
-        </section>
-    </main>
+        <div id="action-controls" class="hidden">
+            <button class="btn-action" data-action="pon">ポン</button>
+            <button class="btn-action" data-action="kan">カン</button>
+            <button class="btn-action" data-action="riichi">リーチ</button>
+            <button class="btn-action win" data-action="ron">ロン</button>
+            <button class="btn-action win" data-action="tsumo">ツモ</button>
+            <button class="btn-action secondary" data-action="skip">キャンセル</button>
+            <button class="btn-action" data-action="kita">北抜き</button>
+        </div>
 
-    <script src="https://cdn.socket.io/4.7.2/socket.io.min.js"></script> <script src="mahjong.js"></script> </body>
+        <div id="cutin-layer"></div>
+
+    </section>
+
+    <div id="modal-overlay" class="hidden">
+        
+        <div id="result-modal" class="modal-content hidden">
+            <h2 id="result-title">ロン</h2>
+            <div id="yaku-list">
+                </div>
+            <div id="score-move">
+                </div>
+            <button id="btn-next-round">次へ</button>
+        </div>
+
+        <div id="game-over-modal" class="modal-content hidden">
+            <h2>対局終了</h2>
+            <table id="final-ranking">
+                <thead>
+                    <tr><th>順位</th><th>名前</th><th>点数</th></tr>
+                </thead>
+                <tbody>
+                    </tbody>
+            </table>
+            <button id="btn-back-lobby">ロビーに戻る</button>
+        </div>
+
+    </div>
+
+    <script type="module" src="js/main.js"></script>
+</body>
 </html>
