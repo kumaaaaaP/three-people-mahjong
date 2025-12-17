@@ -1,15 +1,16 @@
 /**
  * js/main.js
- * アプリケーションのエントリーポイント
+ * アプリケーションのエントリーポイント (更新版)
  */
 
 import { GameConfig } from './config.js';
 import { GameState } from './core/GameState.js'; 
 import { Renderer } from './view/Renderer.js';
+import { Player } from './core/Player.js'; // Playerクラスもインポート
 
 class Main {
     constructor() {
-        // DOM要素のキャッシュ
+        // ... (DOMキャッシュ部分は変更なし)
         this.dom = {
             lobby: document.getElementById('scene-lobby'),
             game: document.getElementById('scene-game'),
@@ -37,7 +38,7 @@ class Main {
     }
 
     /**
-     * イベントハンドラの登録
+     * イベントハンドラの登録 (更新)
      */
     bindEvents() {
         // 対局開始ボタン
@@ -55,10 +56,35 @@ class Main {
                 }
             });
         });
+
+        // ⭐ 新規追加: Rendererから発火される打牌イベントを捕捉
+        document.addEventListener('discardTile', (e) => {
+            this.handleUserDiscard(e.detail);
+        });
+    }
+    
+    /**
+     * ユーザーからの打牌イベントを処理し、GameStateに渡す
+     * @param {Tile} tile - 捨てられた牌のTileオブジェクト
+     */
+    handleUserDiscard(tile) {
+        if (this.gameState && this.gameState.gamePhase === 'DISCARD') {
+            const player = this.gameState.turnPlayer;
+            if (player && player.id === this.gameState.players[0].id) { // 常に自分が東家/p0と仮定
+                
+                // 1. ユーザー操作を一時的に無効化 (二重操作防止)
+                this.renderer.disableDiscardInput(); 
+
+                // 2. GameStateのコアロジックを呼び出す
+                // handleDiscardは非同期 (鳴き待ちやアニメーションがあるため)
+                this.gameState.handleDiscard(player, tile);
+            }
+        }
     }
 
+
     /**
-     * ゲーム開始フロー
+     * ゲーム開始フロー (更新)
      */
     async handleStartGame() {
         // 1. 設定の読み込み
@@ -68,11 +94,9 @@ class Main {
         this.switchScene('game');
 
         // 3. ゲームコアの初期化
-        // 描画クラスのインスタンス化
         this.renderer = new Renderer();
         
-        // ゲーム状態管理クラスのインスタンス化 (ConfigとRendererを渡す)
-        // Rendererを渡すことで、状態変化があったら即座に描画メソッドを呼べるようにする
+        // ⭐ GameStateにRendererのインスタンスを渡し、Game Stateが変更を通知できるようにする
         this.gameState = new GameState(this.config, this.renderer);
 
         // 4. ゲームスタート (配牌〜開局)
@@ -82,53 +106,16 @@ class Main {
         } catch (e) {
             console.error("Game Error:", e);
             alert("エラーが発生しました: " + e.message);
-            // エラー時はロビーに戻すなどの処理
             this.switchScene('lobby');
         }
     }
 
-    /**
-     * フォームから設定値を読み取ってConfigオブジェクトに反映
-     */
-    readSettings() {
-        const form = this.dom.settingsForm;
+    // ... (readSettings と switchScene メソッドは変更なし)
 
-        // モード
-        this.config.mode = form.mode.value;
-        if (this.config.mode === 'online') {
-            this.config.roomId = document.getElementById('room-id').value || 'default_room';
-        }
-
-        // 戦形式
-        this.config.length = document.getElementById('game-length').value;
-
-        // 赤ドラ設定 (チェックがあれば1枚、なければ0枚)
-        this.config.redRules.p3 = document.getElementById('red-3p').checked ? 1 : 0;
-        this.config.redRules.s3 = document.getElementById('red-3s').checked ? 1 : 0;
-        this.config.redRules.p7 = document.getElementById('red-7p').checked ? 1 : 0;
-        this.config.redRules.s7 = document.getElementById('red-7s').checked ? 1 : 0;
-    }
-
-    /**
-     * シーン切り替え
-     * @param {string} sceneName 'lobby' or 'game'
-     */
-    switchScene(sceneName) {
-        if (sceneName === 'game') {
-            this.dom.lobby.classList.add('hidden');
-            this.dom.lobby.classList.remove('active');
-            
-            this.dom.game.classList.remove('hidden');
-            // 少し遅延させてフェードインなどの演出を入れる余地
-            setTimeout(() => this.dom.game.classList.add('active'), 50);
-        } else {
-            this.dom.game.classList.add('hidden');
-            this.dom.game.classList.remove('active');
-            
-            this.dom.lobby.classList.remove('hidden');
-            this.dom.lobby.classList.add('active');
-        }
-    }
+    // アプリケーション起動
+    // window.addEventListener('DOMContentLoaded', () => {
+    //     new Main();
+    // });
 }
 
 // アプリケーション起動
